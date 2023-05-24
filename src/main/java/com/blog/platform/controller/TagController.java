@@ -29,5 +29,6 @@ public class TagController {
     @GetMapping("/tags/{startDate}/{endDate}")
     public ResponseEntity<List<TagResponse>> getAllTags(@PathVariable LocalDate startDate, @PathVariable LocalDate endDate) {
         return tagService.getAllTags(startDate, endDate);
+
     }
 }
