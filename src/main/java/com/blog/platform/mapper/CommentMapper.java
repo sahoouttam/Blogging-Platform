@@ -11,7 +11,7 @@ import java.time.LocalDate;
 
 public class CommentMapper {
 
-    public static CommentResponse convertComment(Comment comment) {
+    public CommentResponse convertComment(Comment comment) {
         return CommentResponse.builder()
                 .id(comment.getId())
                 .name(comment.getName())
@@ -21,7 +21,7 @@ public class CommentMapper {
                 .build();
     }
 
-    public static Comment convertCommentRequest(CommentRequest commentRequest) {
+    public Comment convertCommentRequest(CommentRequest commentRequest) {
         return Comment.builder()
                 .name(commentRequest.getName())
                 .body(commentRequest.getBody())

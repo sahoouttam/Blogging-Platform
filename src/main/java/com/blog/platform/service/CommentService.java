@@ -24,46 +24,46 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CommentService {
 
-    @Autowired
     private final CommentRepository commentRepository;
 
-    public ResponseEntity<HttpStatus> createComment(CommentRequest commentRequest) {
-        Comment comment = CommentMapper.convertCommentRequest(commentRequest);
-        commentRepository.save(comment);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    private final CommentMapper commentMapper;
+
+    @Autowired
+    public CommentService(CommentRepository commentRepository, CommentMapper commentMapper) {
+        this.commentRepository = commentRepository;
+        this.commentMapper = commentMapper;
+    }
+
+    public Comment createComment(CommentRequest commentRequest) {
+        Comment comment = commentMapper.convertCommentRequest(commentRequest);
+        return commentRepository.save(comment);
     }
 
     @Cacheable(value = "comment_by_name")
-    public ResponseEntity<CommentResponse> getCommentByName(String name) {
-        CommentResponse comment = commentRepository.findByName(name)
-                .map(CommentMapper::convertComment)
+    public CommentResponse getCommentByName(String name) {
+        return commentRepository.findByName(name)
+                .map(commentMapper::convertComment)
                 .orElseThrow(() -> new CommentNotFoundException(Constants.COMMENT_NOT_FOUND));
-
-        return new ResponseEntity<>(comment, HttpStatus.OK);
     }
 
     @Cacheable(value = "comments")
-    public ResponseEntity<List<CommentResponse>> getCommentsByBody(String body) {
-        List<CommentResponse> comments = commentRepository.findFirst10ByBodyContaining(body)
+    public List<CommentResponse> getCommentsByBody(String body) {
+        return commentRepository.findFirst10ByBodyContaining(body)
                 .stream()
-                .map(CommentMapper::convertComment)
+                .map(commentMapper::convertComment)
                 .limit(10)
                 .collect(Collectors.toList());
-
-        return new ResponseEntity<>(comments, HttpStatus.OK);
     }
 
-    public ResponseEntity<HttpStatus> updateComment(Long id, CommentRequest commentRequest) {
+    public Comment updateComment(Long id, CommentRequest commentRequest) {
         Comment comment = commentRepository.findById(id)
                         .orElseThrow(() -> new CommentNotFoundException(Constants.COMMENT_NOT_FOUND));
         CommentMapper.updateComment(comment, commentRequest);
-        commentRepository.save(comment);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return commentRepository.save(comment);
     }
 
     @CacheEvict(value = "comments")
-    public ResponseEntity<HttpStatus> deleteComment(Long id) {
+    public void deleteComment(Long id) {
         commentRepository.deleteById(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
